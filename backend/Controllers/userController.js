@@ -77,8 +77,7 @@ router.post(
                     .status(200)
                     .cookie("token", authToken, {
                       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                      httpOnly: true,
-                      domain: "https://cheetah-production.up.railway.app", // Replace with your domain
+                      // httpOnly: true,
                     })
                     .json({
                       success: true,
@@ -150,8 +149,7 @@ router.post(
                 .status(200)
                 .cookie("token", authToken, {
                   expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                  httpOnly: true,
-                  domain: "https://cheetah-production.up.railway.app", // Replace with your domain
+                  // httpOnly: true,
                 })
                 .json({
                   success: true,
