@@ -3,6 +3,8 @@ const connectToDb = require("./configure/db.js");
 
 connectToDb();
 
-const server = app.listen(process.env.PORT, () => {
-  console.log(`Server is running at http://localhost:${process.env.PORT}`);
+const PORT = process.env.PORT || 4000;
+
+const server = app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
 });

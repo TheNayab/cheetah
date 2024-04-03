@@ -2,9 +2,9 @@
   "name": "cheetah",
   "version": "1.0.0",
   "description": "this is the task that I assigned from cheetah agency",
-  "main": "App.js",
+  "main": "server.js",
   "engines": {
-    "node": "14.x"
+    "node": ">=12.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
