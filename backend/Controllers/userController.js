@@ -76,7 +76,7 @@ router.post(
                   res
                     .status(200)
                     .cookie("token", authToken, {
-                      expires: 30,
+                      expires: new Date(Date.now() + 25892000000),
                       httpOnly: true,
                     })
                     .json({
@@ -148,7 +148,7 @@ router.post(
               return res
                 .status(200)
                 .cookie("token", authToken, {
-                  expires: 30,
+                  expires: new Date(Date.now() + 25892000000),
                   httpOnly: true,
                 })
                 .json({
