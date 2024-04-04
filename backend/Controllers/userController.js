@@ -43,21 +43,12 @@ router.post("/register", (req, res) => {
               const authToken = jwt.sign(data, process.env.JWT_SECRET);
 
               users.save().then(() => {
-                res
-                  .status(200)
-                  .cookie("token", authToken, {
-                    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                    domain: "cheethwork.netlify.app",
-                    httpOnly: true,
-                    secure: true, // Ensures that the cookie is only sent over HTTPS
-                    sameSite: "none",
-                  })
-                  .json({
-                    success: true,
-                    message: `User registered successfully`,
-                    authToken,
-                    users,
-                  });
+                res.status(200).json({
+                  success: true,
+                  message: `User registered successfully`,
+                  authToken,
+                  users,
+                });
               });
             }
           });
@@ -109,20 +100,11 @@ router.post("/login", (req, res) => {
               },
             };
             const authToken = jwt.sign(data, process.env.JWT_SECRET);
-            return res
-              .status(200)
-              .cookie("token", authToken, {
-                expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                domain: "cheethwork.netlify.app",
-                httpOnly: true,
-                secure: true, // Ensures that the cookie is only sent over HTTPS
-                sameSite: "none",
-              })
-              .json({
-                success: true,
-                authToken,
-                user,
-              });
+            return res.status(200).json({
+              success: true,
+              authToken,
+              user,
+            });
           }
           return res.status(401).json({
             message: "Invalid email or password",
