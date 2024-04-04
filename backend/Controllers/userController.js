@@ -8,120 +8,82 @@ const router = express.Router();
 const app = express();
 
 // Registration method
-router.post(
-  "/register",
-  [
-    body("name")
-      .isLength({ min: 3 })
-      .notEmpty()
-      .withMessage("Please Enter A valid name"),
-    body("email")
-      .isEmail()
-      .withMessage("Please Enter A Valid Email")
-      .isLength({ max: 320 })
-      .withMessage("Password must contain up to 320 characters")
-      .normalizeEmail(),
-    body("password")
-      .notEmpty()
-      .withMessage("Please Enter A Valid Password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters")
-      .isLength({ max: 128 })
-      .withMessage("Password must contain up to 128 characters")
-      .matches(/[A-Z]/g)
-      .withMessage("Password must contain an upper case letter")
-      .matches(/[a-z]/g)
-      .withMessage("Password must contain a lower case letter")
-      .matches(/[0-9]/g)
-      .withMessage("Password must contain a number")
-      .not()
-      .matches(/\s/g)
-      .withMessage("Please do not use space characters"),
-  ],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
-    User.findOne({ email: req.body.email })
-      .exec()
-      .then((user) => {
-        if (user) {
-          res.status(402).json({
-            message: "This user is already exist",
+router.post("/register", (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
+  User.findOne({ email: req.body.email })
+    .exec()
+    .then((user) => {
+      if (user) {
+        res.status(402).json({
+          message: "This user is already exist",
+        });
+      } else {
+        if (req.body.password === req.body.confirmPassword) {
+          bcrypt.hash(req.body.password, 10, (err, hash) => {
+            if (err) {
+              res.status(500).json({
+                error: err.message,
+              });
+            } else {
+              const users = new User({
+                name: req.body.name,
+                email: req.body.email,
+                password: hash,
+              });
+              const data = {
+                user: {
+                  id: users.id,
+                },
+              };
+              const authToken = jwt.sign(data, process.env.JWT_SECRET);
+
+              users.save().then(() => {
+                res
+                  .status(200)
+                  .cookie("token", authToken, {
+                    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                    httpOnly: true,
+                    secure: true, // Ensures that the cookie is only sent over HTTPS
+                    sameSite: "Lax",
+                  })
+                  .json({
+                    success: true,
+                    message: `User registered successfully`,
+                    users,
+                  });
+              });
+            }
           });
         } else {
-          if (req.body.password === req.body.confirmPassword) {
-            bcrypt.hash(req.body.password, 10, (err, hash) => {
-              if (err) {
-                res.status(500).json({
-                  error: err.message,
-                });
-              } else {
-                const users = new User({
-                  name: req.body.name,
-                  email: req.body.email,
-                  password: hash,
-                });
-                const data = {
-                  user: {
-                    id: users.id,
-                  },
-                };
-                const authToken = jwt.sign(data, process.env.JWT_SECRET);
-
-                users.save().then(() => {
-                  res
-                    .status(200)
-                    .cookie("token", authToken, {
-                      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                      httpOnly: true,
-                      secure: true, // Ensures that the cookie is only sent over HTTPS
-                      sameSite: "none",
-                    })
-                    .json({
-                      success: true,
-                      message: `User registered successfully`,
-                      users,
-                    });
-                });
-              }
-            });
-          } else {
-            res.status(400).json({
-              success: false,
-              message: "Password not matched",
-            });
-          }
-        }
-      })
-      .catch((err) => {
-        if (err.name === "CastError") {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
-            message: "Resource not found",
+            message: "Password not matched",
           });
         }
-        return res.status(500).json({
+      }
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).json({
           success: false,
-          message: err.message,
+          message: "Resource not found",
         });
+      }
+      return res.status(500).json({
+        success: false,
+        message: err.message,
       });
-  }
-);
+    });
+});
 
 //login
 router.post(
   "/login",
-  [
-    body("email")
-      .isEmail()
-      .withMessage("Please Enter A Valid Email")
-      .normalizeEmail(),
-    body("password").notEmpty().withMessage("Please Enter A Valid Password"),
-  ],
   (req, res) => {
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Max-Age", "1800");
@@ -153,7 +115,7 @@ router.post(
                   expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                   httpOnly: true,
                   secure: true, // Ensures that the cookie is only sent over HTTPS
-                  sameSite: "none",
+                  sameSite: "Lax",
                 })
                 .json({
                   success: true,
