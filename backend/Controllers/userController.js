@@ -49,7 +49,7 @@ router.post("/register", (req, res) => {
                     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                     httpOnly: true,
                     secure: true, // Ensures that the cookie is only sent over HTTPS
-                    sameSite: "Lax",
+                    sameSite: "none",
                   })
                   .json({
                     success: true,
@@ -114,7 +114,7 @@ router.post("/login", (req, res) => {
                 expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                 httpOnly: true,
                 secure: true, // Ensures that the cookie is only sent over HTTPS
-                sameSite: "Lax",
+                sameSite: "none",
               })
               .json({
                 success: true,
