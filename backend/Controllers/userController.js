@@ -54,6 +54,7 @@ router.post("/register", (req, res) => {
                   .json({
                     success: true,
                     message: `User registered successfully`,
+                    authToken,
                     users,
                   });
               });
@@ -82,66 +83,63 @@ router.post("/register", (req, res) => {
 });
 
 //login
-router.post(
-  "/login",
-  (req, res) => {
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Max-Age", "1800");
-    User.findOne({ email: req.body.email })
+router.post("/login", (req, res) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Max-Age", "1800");
+  User.findOne({ email: req.body.email })
 
-      .exec()
-      .then((user) => {
-        if (!user) {
-          res.status(401).json({
-            message: "Invalid email or password ",
-          });
-        } else {
-          bcrypt.compare(req.body.password, user.password, (err, result) => {
-            if (err) {
-              res.status(401).json({
-                message: "Invalid email or password",
-              });
-            }
-            if (result) {
-              const data = {
-                user: {
-                  id: user.id,
-                },
-              };
-              const authToken = jwt.sign(data, process.env.JWT_SECRET);
-              return res
-                .status(200)
-                .cookie("token", authToken, {
-                  expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                  httpOnly: true,
-                  secure: true, // Ensures that the cookie is only sent over HTTPS
-                  sameSite: "Lax",
-                })
-                .json({
-                  success: true,
-                  authToken,
-                  user,
-                });
-            }
-            return res.status(401).json({
+    .exec()
+    .then((user) => {
+      if (!user) {
+        res.status(401).json({
+          message: "Invalid email or password ",
+        });
+      } else {
+        bcrypt.compare(req.body.password, user.password, (err, result) => {
+          if (err) {
+            res.status(401).json({
               message: "Invalid email or password",
             });
+          }
+          if (result) {
+            const data = {
+              user: {
+                id: user.id,
+              },
+            };
+            const authToken = jwt.sign(data, process.env.JWT_SECRET);
+            return res
+              .status(200)
+              .cookie("token", authToken, {
+                expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                httpOnly: true,
+                secure: true, // Ensures that the cookie is only sent over HTTPS
+                sameSite: "Lax",
+              })
+              .json({
+                success: true,
+                authToken,
+                user,
+              });
+          }
+          return res.status(401).json({
+            message: "Invalid email or password",
           });
-        }
-      })
-      .catch((err) => {
-        if (err.name === "CastError") {
-          return res.status(400).json({
-            message: "Resource not found",
-          });
-        }
-        return res.status(500).json({
-          success: false,
-          message: err.message,
         });
+      }
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).json({
+          message: "Resource not found",
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        message: err.message,
       });
-  }
-);
+    });
+});
 
 // Logout
 router.get("/logout", (req, res) => {
