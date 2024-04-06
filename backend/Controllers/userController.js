@@ -128,11 +128,6 @@ router.post("/login", (req, res) => {
 // Logout
 router.get("/logout", (req, res) => {
   try {
-    res.cookie("token", null, {
-      expires: new Date(Date.now()),
-      httpOnly: true,
-    });
-
     res.status(201).json({
       success: true,
       message: "Logged Out",
