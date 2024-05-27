@@ -8,11 +8,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://cheethwork.netlify.app",
+    origin: ["https://cheethwork.netlify.app", "http://localhost:3000"],
     credentials: true,
   })
 );
-
 
 app.use(express.json());
 app.use(cookieParser());
